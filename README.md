@@ -208,9 +208,7 @@ Desenvolvido por **Gabriel Froes** e **Vanessa Weber** do [Código Fonte TV](htt
 
 Confira o vídeo explicativo no canal:
 
-[![Código Fonte TV — Novo CNPJ Alfanumérico](https://img.youtube.com/vi/VIDEO_ID/hqdefault.jpg)](https://www.youtube.com/watch?v=VIDEO_ID)
-
-> Substitua `VIDEO_ID` pela ID real do vídeo publicado no canal.
+[![Código Fonte TV — Novo CNPJ Alfanumérico](https://img.youtube.com/vi/PrlLdgwxpdo/hqdefault.jpg)](https://www.youtube.com/watch?v=PrlLdgwxpdo)
 
 ---
 
