@@ -1,6 +1,14 @@
-# novo-cnpj — Validador de CNPJ Alfanumérico em TypeScript
+# novo-cnpj — Validador de CNPJ Alfanumérico
 
-Biblioteca **zero dependências** para validar e tipar o novo **CNPJ Alfanumérico** da Receita Federal, implementado em TypeScript puro com suporte ao formato legado (numérico) e ao novo formato alfanumérico previsto para entrar em vigor em **julho de 2026**.
+Biblioteca **zero dependências** para validar e tipar o novo **CNPJ Alfanumérico** da Receita Federal. Disponível em **TypeScript** e **Java**, com suporte ao formato legado (numérico) e ao novo formato alfanumérico previsto para entrar em vigor em **julho de 2026**.
+
+---
+
+Este projeto tem como base o repositório desenvolvido por **Gabriel Froes** e **Vanessa Weber** do [Código Fonte TV](https://www.youtube.com/@codigofontetv).
+
+Confira o vídeo explicativo no canal:
+
+[![Código Fonte TV — Novo CNPJ Alfanumérico](https://img.youtube.com/vi/PrlLdgwxpdo/hqdefault.jpg)](https://www.youtube.com/watch?v=PrlLdgwxpdo)
 
 ---
 
@@ -87,17 +95,21 @@ Cada caractere da base é convertido para um valor numérico subtraindo 48 do se
 
 ---
 
-## Instalação
+## Implementações
+
+### TypeScript
+
+Biblioteca **zero dependências** para projetos TypeScript/JavaScript. Ideal para uso em Node.js, Deno ou Bun.
+
+#### Instalação
 
 O código é um único arquivo TypeScript sem dependências externas. Basta copiar `CnpjValidator.ts` para o seu projeto.
 
 Os testes utilizam o módulo nativo `node:test` do Node.js (disponível a partir da versão 18).
 
----
+#### Como usar
 
-## Como usar
-
-### Verificar se um CNPJ é válido — `isValid`
+##### Verificar se um CNPJ é válido — `isValid`
 
 ```typescript
 import { CnpjValidator } from "./CnpjValidator";
@@ -117,7 +129,7 @@ CnpjValidator.isValid("00000000000000"); // false (sequência uniforme)
 CnpjValidator.isValid(null); // false (não é string)
 ```
 
-### Criar um CNPJ tipado e normalizado — `create`
+##### Criar um CNPJ tipado e normalizado — `create`
 
 ```typescript
 import { CnpjValidator, Cnpj } from "./CnpjValidator";
@@ -130,11 +142,9 @@ console.log(cnpj); // "12ABC34501AB77"
 CnpjValidator.create("12.ABC.345/01AB-36"); // Erro: "Invalid Alphanumeric CNPJ!"
 ```
 
----
+#### API
 
-## API
-
-### `CnpjValidator.isValid(cnpj: unknown): boolean`
+##### `CnpjValidator.isValid(cnpj: unknown): boolean`
 
 Verifica se um valor é um CNPJ válido (numérico legado ou alfanumérico).
 
@@ -144,14 +154,14 @@ Verifica se um valor é um CNPJ válido (numérico legado ou alfanumérico).
 - Rejeita sequências em que todos os 14 caracteres são iguais (ex: `AAAAAAAAAAAAAA`)
 - Retorna `true` apenas se os dois dígitos verificadores baterem com o algoritmo da Receita Federal
 
-### `CnpjValidator.create(cnpj: string): Cnpj`
+##### `CnpjValidator.create(cnpj: string): Cnpj`
 
 Cria um valor do tipo `Cnpj` (string com Branded Type) a partir de uma string.
 
 - Retorna o CNPJ **normalizado**: somente letras maiúsculas e números, sem máscara
 - Lança `Error("Invalid Alphanumeric CNPJ!")` se o CNPJ não for válido
 
-### Tipo `Cnpj`
+##### Tipo `Cnpj`
 
 ```typescript
 export type Cnpj = string & { readonly __brand: unique symbol };
@@ -168,9 +178,7 @@ processarEmpresa("12ABC34501AB77"); // Erro de tipo em tempo de compilação!
 processarEmpresa(CnpjValidator.create("...")); // OK
 ```
 
----
-
-## Rodando os testes
+#### Rodando os testes
 
 O projeto não requer nenhum build prévio. Escolha o runtime de sua preferência:
 
@@ -202,13 +210,147 @@ Os testes cobrem:
 
 ---
 
-## Autores
+### Java
 
-Desenvolvido por **Gabriel Froes** e **Vanessa Weber** do [Código Fonte TV](https://www.youtube.com/@codigofontetv).
+Port da implementação TypeScript para **Java 16+**, utilizando `record` para o tipo `Cnpj` e a classe utilitária `CnpjValidator` com métodos estáticos.
 
-Confira o vídeo explicativo no canal:
+#### Requisitos
 
-[![Código Fonte TV — Novo CNPJ Alfanumérico](https://img.youtube.com/vi/PrlLdgwxpdo/hqdefault.jpg)](https://www.youtube.com/watch?v=PrlLdgwxpdo)
+- Java 16 ou superior (necessário para suporte a `record`)
+- Nenhuma dependência externa
+
+#### Estrutura dos arquivos
+
+```
+src/main/
+├── Cnpj.java           # Record imutável que representa um CNPJ validado
+├── CnpjValidator.java  # Lógica de validação e criação
+└── Main.java           # Exemplo de uso
+```
+
+#### Como usar
+
+##### Criar um CNPJ validado — `CnpjValidator.create`
+
+```java
+import src.main.Cnpj;
+import src.main.CnpjValidator;
+
+// CNPJ numérico legado (com máscara)
+Cnpj cnpj = CnpjValidator.create("11.222.333/0001-81");
+System.out.println(cnpj.value()); // "11222333000181"
+
+// Novo formato alfanumérico
+Cnpj cnpjAlfa = CnpjValidator.create("12.ABC.345/01AB-77");
+System.out.println(cnpjAlfa.value()); // "12ABC34501AB77"
+
+// Aceita letras minúsculas — normaliza automaticamente para maiúsculas
+Cnpj cnpjLower = CnpjValidator.create("12.abc.345/01ab-77");
+System.out.println(cnpjLower.value()); // "12ABC34501AB77"
+
+// Lança IllegalArgumentException para CNPJs inválidos
+CnpjValidator.create("12.ABC.345/01AB-36"); // Erro: "Invalid Alphanumeric CNPJ! - ..."
+```
+
+#### API
+
+##### `CnpjValidator.create(String cnpj): Cnpj`
+
+Cria um `Cnpj` a partir de uma string.
+
+- Remove automaticamente caracteres não alfanuméricos (pontos, barras, traços etc.)
+- Converte letras minúsculas para maiúsculas
+- Lança `IllegalArgumentException` se o CNPJ for inválido
+
+##### `record Cnpj(String value)`
+
+Record imutável que encapsula um CNPJ já validado e normalizado (somente letras maiúsculas e números, sem máscara). O uso de `record` garante imutabilidade e `equals`/`hashCode` automáticos.
+
+```java
+Cnpj cnpj = CnpjValidator.create("11.222.333/0001-81");
+cnpj.value();     // "11222333000181"
+cnpj.toString();  // "11222333000181"
+```
+
+#### Compilando e executando
+
+```bash
+# Compilar
+javac -d out src/main/Cnpj.java src/main/CnpjValidator.java src/main/Main.java
+
+# Executar
+java -cp out src.main.Main
+```
+
+---
+
+## Comparação entre as implementações
+
+### Modelo de tipos
+
+| Aspecto | TypeScript | Java |
+| ------- | ---------- | ---- |
+| Tipo do CNPJ | Branded Type (`string & { __brand }`) | `record Cnpj(String value)` |
+| Garantia em tempo de compilação | Sim — impede uso de strings não validadas diretamente | Sim — o `record` é um tipo distinto de `String` |
+| Imutabilidade | Inerente ao Branded Type | Garantida pelo `record` (Java 16+) |
+| Igualdade estrutural | Não nativa (é uma string) | Gerada automaticamente pelo `record` |
+
+### Validação
+
+| Aspecto | TypeScript | Java |
+| ------- | ---------- | ---- |
+| Método de validação | `CnpjValidator.isValid(cnpj)` (público) | Validação interna via `isValid` (privado) |
+| Retorno para CNPJ inválido | `false` (no `isValid`) ou `Error` (no `create`) | `IllegalArgumentException` (no `create`) |
+| Rejeição de sequências uniformes | Sim (`AAAAAAAAAAAAAA` → `false`) | Não implementado na versão Java |
+| Aceita tipos não-string | `false` para `null`, `undefined`, números etc. | Retorna `false` para `null` |
+
+### Uso prático
+
+```typescript
+// TypeScript — verificar antes de criar
+if (CnpjValidator.isValid(rawInput)) {
+  const cnpj = CnpjValidator.create(rawInput);
+  console.log(cnpj); // string tipada
+}
+```
+
+```java
+// Java — usar try/catch
+try {
+    Cnpj cnpj = CnpjValidator.create(rawInput);
+    System.out.println(cnpj.value());
+} catch (IllegalArgumentException e) {
+    System.out.println("Inválido: " + e.getMessage());
+}
+```
+
+### Expressão do algoritmo de cálculo
+
+Ambas as implementações seguem o mesmo algoritmo (módulo 11, pesos idênticos). A diferença está na expressividade de cada linguagem:
+
+```typescript
+// TypeScript — arrow function e reduce
+const calculateCheckDigit = (base: string, weights: number[]): number => {
+  const sum = base.split("").reduce((acc, char, i) => {
+    return acc + (char.charCodeAt(0) - 48) * weights[i];
+  }, 0);
+  const remainder = sum % 11;
+  return remainder < 2 ? 0 : 11 - remainder;
+};
+```
+
+```java
+// Java — método privado com loop imperativo
+private static int calculateCheckDigit(String baseString, int[] weights) {
+    int sum = 0;
+    for (int i = 0; i < baseString.length(); i++) {
+        final int charValue = baseString.charAt(i) - 48;
+        sum += charValue * weights[i];
+    }
+    int remainder = sum % 11;
+    return remainder < 2 ? 0 : 11 - remainder;
+}
+```
 
 ---
 
