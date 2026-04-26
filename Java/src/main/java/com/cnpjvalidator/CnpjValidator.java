@@ -1,9 +1,9 @@
-package src.main;
+package com.cnpjvalidator;
 
 import java.util.regex.Pattern;
 
 public class CnpjValidator {
-    private static Pattern pattern = Pattern.compile("/[^A-Za-z0-9]/g");
+    private static Pattern pattern = Pattern.compile("[^A-Za-z0-9]");
     private static String cleanedCnpj;
 
     private CnpjValidator() {}
@@ -19,10 +19,13 @@ public class CnpjValidator {
     }
 
     private static boolean isValid(String cnpj) {
-        if ((cnpj == null)) return false;
+        if (cnpj == null) return false;
 
         cleanedCnpj = pattern.matcher(cnpj).replaceAll("").toUpperCase();
         if (cleanedCnpj.length() != 14) return false;
+
+        // Rejeita sequências em que todos os 14 caracteres são iguais (ex: 11111111111111, AAAAAAAAAAAAAA)
+        if (cleanedCnpj.chars().distinct().count() == 1) return false;
 
         int[] weightsFirstDigit = {5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2};
         // Pega as 12 posições (8 da Raiz + 4 da Ordem) - Todas podem ter letras!

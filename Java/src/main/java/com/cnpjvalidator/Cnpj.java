@@ -1,4 +1,4 @@
-package src.main;
+package com.cnpjvalidator;
 public record Cnpj(String value) {
     public Cnpj {
         if (value == null || value.isBlank()) {

@@ -217,15 +217,28 @@ Port da implementação TypeScript para **Java 16+**, utilizando `record` para o
 #### Requisitos
 
 - Java 16 ou superior (necessário para suporte a `record`)
-- Nenhuma dependência externa
+- Maven 3.6 ou superior (para build e testes)
 
 #### Estrutura dos arquivos
 
+A implementação Java segue a estrutura de diretórios obrigatória do Maven, onde o caminho de pastas dentro de `java/` deve espelhar exatamente o `package` declarado em cada arquivo:
+
 ```
-src/main/
-├── Cnpj.java           # Record imutável que representa um CNPJ validado
-├── CnpjValidator.java  # Lógica de validação e criação
-└── Main.java           # Exemplo de uso
+Java/
+├── pom.xml
+└── src/
+    ├── main/
+    │   └── java/
+    │       └── com/
+    │           └── cnpjvalidator/
+    │               ├── Cnpj.java           # Record imutável que representa um CNPJ validado
+    │               ├── CnpjValidator.java  # Lógica de validação e criação
+    │               └── Main.java           # Exemplo de uso
+    └── test/
+        └── java/
+            └── com/
+                └── cnpjvalidator/
+                    └── CnpjValidatorTest.java  # Testes com JUnit 5
 ```
 
 #### Como usar
@@ -233,8 +246,8 @@ src/main/
 ##### Criar um CNPJ validado — `CnpjValidator.create`
 
 ```java
-import src.main.Cnpj;
-import src.main.CnpjValidator;
+import com.cnpjvalidator.Cnpj;
+import com.cnpjvalidator.CnpjValidator;
 
 // CNPJ numérico legado (com máscara)
 Cnpj cnpj = CnpjValidator.create("11.222.333/0001-81");
@@ -276,11 +289,56 @@ cnpj.toString();  // "11222333000181"
 
 ```bash
 # Compilar
-javac -d out src/main/Cnpj.java src/main/CnpjValidator.java src/main/Main.java
+javac -d out src/main/java/com/cnpjvalidator/Cnpj.java \
+             src/main/java/com/cnpjvalidator/CnpjValidator.java \
+             src/main/java/com/cnpjvalidator/Main.java
 
 # Executar
-java -cp out src.main.Main
+java -cp out com.cnpjvalidator.Main
 ```
+
+Ou, com Maven:
+
+```bash
+# Dentro da pasta Java/, rodar todos os testes
+mvn compile
+```
+
+#### Rodando os testes
+
+Os testes utilizam **JUnit 5 (Jupiter)** e são gerenciados pelo Maven. Não é necessário baixar JARs manualmente — o Maven cuida de tudo.
+
+**Pré-requisitos:**
+Para este repositório foram utilizados:
+- Maven 3.9.15 - pode ser usado Maven 3.6 ou superior instalado e no PATH (`mvn -v` deve funcionar no terminal)
+- Java 25 - pode ser usado Java 16 ou superior
+
+Configurações presentes no arquivo `pom.xml` presente na raiz da pasta `Java/`.
+
+**Executando os testes**
+
+```bash
+# Dentro da pasta Java/, rodar todos os testes
+mvn test
+```
+
+A saída esperada ao final é:
+
+```
+[INFO] Tests run: 33, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+```
+
+**O que os testes cobrem**
+
+Os testes estão organizados em 4 grupos com `@Nested`:
+
+| Grupo | O que verifica |
+| ----- | -------------- |
+| `create() — CNPJs válidos` | Numérico e alfanumérico com/sem máscara, normalização de lowercase, `toString()` e igualdade de `record` |
+| `create() — CNPJs inválidos` | Dígitos verificadores errados, comprimento inválido, `null`, entradas em branco, sequências uniformes (`00000000000000`, `11111111111111`, `AAAAAAAAAAAAAA` etc.) |
+| `Cnpj record — construtor` | Proteções do próprio `record`: rejeita `null` e blank, acesso ao `value()` |
+| `Normalização da entrada` | Remoção de máscara, uppercase de letras, remoção de espaços |
 
 ---
 
@@ -301,7 +359,7 @@ java -cp out src.main.Main
 | ------- | ---------- | ---- |
 | Método de validação | `CnpjValidator.isValid(cnpj)` (público) | Validação interna via `isValid` (privado) |
 | Retorno para CNPJ inválido | `false` (no `isValid`) ou `Error` (no `create`) | `IllegalArgumentException` (no `create`) |
-| Rejeição de sequências uniformes | Sim (`AAAAAAAAAAAAAA` → `false`) | Não implementado na versão Java |
+| Rejeição de sequências uniformes | Sim (`AAAAAAAAAAAAAA` → `false`) | Sim (`AAAAAAAAAAAAAA` → `IllegalArgumentException`) |
 | Aceita tipos não-string | `false` para `null`, `undefined`, números etc. | Retorna `false` para `null` |
 
 ### Uso prático

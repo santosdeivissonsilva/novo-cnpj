@@ -1,4 +1,4 @@
-package src.main;
+package com.cnpjvalidator;
 
 public class Main {
  
